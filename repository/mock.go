@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"tokyo-house/domain"
+	"tokyo-house-contract/domain"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -12,21 +12,21 @@ type Mock struct {
 }
 
 // NewContract mock to repository layer.
-func (mock *Mock) NewContract(h *domain.House) (err error) {
+func (mock *Mock) NewContract(h *domain.HouseContract) (err error) {
 	return
 }
 
 // AllContracts mock to repository layer.
-func (mock *Mock) AllContracts() (hs []*domain.House, err error) {
+func (mock *Mock) AllContracts() (hs []*domain.HouseContract, err error) {
 	return
 }
 
 // GetContractByHouseID mock to repository layer.
-func (mock *Mock) GetContractByHouseID(id int64) (h *domain.House, err error) {
+func (mock *Mock) GetContractByHouseID(id int64) (h *domain.HouseContract, err error) {
 	return
 }
 
 // Update mock to repository layer.
-func (mock *Mock) Update(h *domain.House) (err error) {
+func (mock *Mock) Update(h *domain.HouseContract) (err error) {
 	return
 }

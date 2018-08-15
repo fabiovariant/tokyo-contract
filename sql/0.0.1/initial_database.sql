@@ -1,5 +1,9 @@
 BEGIN;
 
+CREATE IF NOT EXISTS DATABASE tokyo_house_contracts;
+
+\c tokyo_house_contracts;
+
 /*
     Domain register of contract types to reference.
 */

@@ -2,8 +2,8 @@ package postgresql
 
 import (
 	"database/sql"
-	"tokyo-house/domain"
-	"tokyo-house/repository"
+	"tokyo-house-contract/domain"
+	"tokyo-house-contract/repository"
 )
 
 type contractsPostgresqlRepository struct {
@@ -15,7 +15,7 @@ func NewContractsPostgresqlRepository(db *sql.DB) repository.ContractsRepository
 	return &contractsPostgresqlRepository{db}
 }
 
-func (cr *contractsPostgresqlRepository) NewContract(h *domain.House) (err error) {
+func (cr *contractsPostgresqlRepository) NewContract(h *domain.HouseContract) (err error) {
 	sql := `INSERT INTO House_Contract
 				(Trade,
 				Company_Name,
@@ -34,8 +34,8 @@ func (cr *contractsPostgresqlRepository) NewContract(h *domain.House) (err error
 			tx.Rollback()
 		}
 	}()
-	r, err := tx.Exec(sql, h.Trade, h.CompanyName, h.DocumentID, h.Contract.CdContract,
-		h.Contract.DtInitContract, h.Contract.DtEndContract, h.Contract.IsActive)
+	r, err := tx.Exec(sql, h.Trade, h.CompanyName, h.DocumentID, h.TpContract.CdContract,
+		h.DtInitContract, h.DtEndContract, h.IsActive)
 	if err != nil {
 		return
 	}
@@ -43,7 +43,7 @@ func (cr *contractsPostgresqlRepository) NewContract(h *domain.House) (err error
 	return
 }
 
-func (cr *contractsPostgresqlRepository) AllContracts() (hs []*domain.House, err error) {
+func (cr *contractsPostgresqlRepository) AllContracts() (hs []*domain.HouseContract, err error) {
 	sql := `SELECT
 				House_id,
 				Trade,
@@ -59,9 +59,9 @@ func (cr *contractsPostgresqlRepository) AllContracts() (hs []*domain.House, err
 		return
 	}
 	for rows.Next() {
-		var h = new(domain.House)
-		err = rows.Scan(&h.ID, &h.Trade, &h.CompanyName, &h.DocumentID, &h.Contract.CdContract,
-			&h.Contract.DtInitContract, &h.Contract.DtEndContract, &h.Contract.IsActive)
+		var h = new(domain.HouseContract)
+		err = rows.Scan(&h.ID, &h.Trade, &h.CompanyName, &h.DocumentID, &h.TpContract.CdContract,
+			&h.DtInitContract, &h.DtEndContract, &h.IsActive)
 		if err != nil {
 			return
 		}
@@ -70,7 +70,7 @@ func (cr *contractsPostgresqlRepository) AllContracts() (hs []*domain.House, err
 	return
 }
 
-func (cr *contractsPostgresqlRepository) GetContractByHouseID(id int64) (h *domain.House, err error) {
+func (cr *contractsPostgresqlRepository) GetContractByHouseID(id int64) (h *domain.HouseContract, err error) {
 	sql := `SELECT
 				House_id,
 				Trade,
@@ -86,9 +86,9 @@ func (cr *contractsPostgresqlRepository) GetContractByHouseID(id int64) (h *doma
 		return
 	}
 	if rows.Next() {
-		hh := new(domain.House)
-		err = rows.Scan(&hh.ID, &hh.Trade, &hh.CompanyName, &hh.DocumentID, &hh.Contract.CdContract,
-			&hh.Contract.DtInitContract, &hh.Contract.DtEndContract, &hh.Contract.IsActive)
+		hh := new(domain.HouseContract)
+		err = rows.Scan(&hh.ID, &hh.Trade, &hh.CompanyName, &hh.DocumentID, &hh.TpContract.CdContract,
+			&hh.DtInitContract, &hh.DtEndContract, &hh.IsActive)
 		if err != nil {
 			return
 		}
@@ -97,7 +97,7 @@ func (cr *contractsPostgresqlRepository) GetContractByHouseID(id int64) (h *doma
 	return
 }
 
-func (cr *contractsPostgresqlRepository) Update(h *domain.House) (err error) {
+func (cr *contractsPostgresqlRepository) Update(h *domain.HouseContract) (err error) {
 	sql := `UPDATE House_Contract SET
 				Trade = $1,
 				Company_Name = $2,
@@ -116,8 +116,8 @@ func (cr *contractsPostgresqlRepository) Update(h *domain.House) (err error) {
 			tx.Rollback()
 		}
 	}()
-	_, err = tx.Exec(sql, h.Trade, h.CompanyName, h.DocumentID, h.Contract.CdContract,
-		h.Contract.DtInitContract, h.Contract.DtEndContract, h.Contract.IsActive, h.ID)
+	_, err = tx.Exec(sql, h.Trade, h.CompanyName, h.DocumentID, h.TpContract.CdContract,
+		h.DtInitContract, h.DtEndContract, h.IsActive, h.ID)
 	return
 }
 

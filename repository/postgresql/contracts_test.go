@@ -4,46 +4,48 @@ import (
 	"database/sql"
 	"errors"
 	t "testing"
-	"tokyo-house/domain"
+	"tokyo-house-contract/domain"
 
+	"github.com/Pallinder/go-randomdata"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 func TestNewContract(t *t.T) {
+	idContract := randomdata.Number(1, 10)
 	db, mock := getDbAndMock(t)
 	defer db.Close()
-	house := domain.GetMock()
+	hc := domain.GetMock()
 	mock.ExpectBegin()
 	mock.ExpectExec("INSERT INTO House_Contract").
-		WithArgs(house.Trade, house.CompanyName, house.DocumentID, house.Contract.CdContract,
-			house.Contract.DtInitContract, house.Contract.DtEndContract, house.Contract.IsActive).
-		WillReturnResult(sqlmock.NewResult(house.ID, 1))
+		WithArgs(hc.Trade, hc.CompanyName, hc.DocumentID, hc.TpContract.CdContract,
+			hc.DtInitContract, hc.DtEndContract, hc.IsActive).
+		WillReturnResult(sqlmock.NewResult(int64(idContract), 1))
 	mock.ExpectCommit()
 	a := NewContractsPostgresqlRepository(db)
-	if err := a.NewContract(&house); err != nil {
+	if err := a.NewContract(&hc); err != nil {
 		t.Errorf("Error saving new house.")
 		t.Error(err)
 	}
-	if house.ID != house.ID {
-		t.Error("Error on returned ID.")
-	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Something wrong: %s", err)
+	}
+	if hc.ID != int64(idContract) {
+		t.Error("Returned ID different from generated.")
 	}
 }
 
 func TestNewContractOnFailure(t *t.T) {
 	db, mock := getDbAndMock(t)
 	defer db.Close()
-	house := domain.GetMock()
+	hc := domain.GetMock()
 	mock.ExpectBegin()
 	mock.ExpectExec("INSERT INTO House_Contract").
-		WithArgs(house.Trade, house.CompanyName, house.DocumentID, house.Contract.CdContract,
-			house.Contract.DtInitContract, house.Contract.DtEndContract, house.Contract.IsActive).
+		WithArgs(hc.Trade, hc.CompanyName, hc.DocumentID, hc.TpContract.CdContract,
+			hc.DtInitContract, hc.DtEndContract, hc.IsActive).
 		WillReturnError(errors.New("Error"))
 	mock.ExpectRollback()
 	a := NewContractsPostgresqlRepository(db)
-	if err := a.NewContract(&house); err == nil {
+	if err := a.NewContract(&hc); err == nil {
 		t.Errorf("Error saving new house.")
 		t.Error(err)
 	}
@@ -70,10 +72,10 @@ func TestAllContracts(t *t.T) {
 			house.Trade,
 			house.CompanyName,
 			house.DocumentID,
-			house.Contract.CdContract,
-			house.Contract.DtInitContract,
-			house.Contract.DtEndContract,
-			house.Contract.IsActive)
+			house.TpContract.CdContract,
+			house.DtInitContract,
+			house.DtEndContract,
+			house.IsActive)
 
 	mock.ExpectQuery("SELECT (.+) FROM House_Contract").WillReturnRows(rows)
 
@@ -125,10 +127,10 @@ func TestGetContractByHouseID(t *t.T) {
 			house.Trade,
 			house.CompanyName,
 			house.DocumentID,
-			house.Contract.CdContract,
-			house.Contract.DtInitContract,
-			house.Contract.DtEndContract,
-			house.Contract.IsActive)
+			house.TpContract.CdContract,
+			house.DtInitContract,
+			house.DtEndContract,
+			house.IsActive)
 
 	mock.ExpectQuery("SELECT (.+) FROM House_Contract WHERE House_id(.*)").WillReturnRows(rows)
 
@@ -166,15 +168,15 @@ func TestGetContractByHouseIDOnFailure(t *t.T) {
 func TestUpdateContract(t *t.T) {
 	db, mock := getDbAndMock(t)
 	defer db.Close()
-	house := domain.GetMock()
+	hc := domain.GetMock()
 	mock.ExpectBegin()
 	mock.ExpectExec("UPDATE House_Contract SET").
-		WithArgs(house.Trade, house.CompanyName, house.DocumentID, house.Contract.CdContract,
-			house.Contract.DtInitContract, house.Contract.DtEndContract, house.Contract.IsActive, house.ID).
+		WithArgs(hc.Trade, hc.CompanyName, hc.DocumentID, hc.TpContract.CdContract,
+			hc.DtInitContract, hc.DtEndContract, hc.IsActive, hc.ID).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	a := NewContractsPostgresqlRepository(db)
-	if err := a.Update(&house); err != nil {
+	if err := a.Update(&hc); err != nil {
 		t.Errorf("Error updating house contract.")
 		t.Error(err)
 	}
@@ -186,15 +188,15 @@ func TestUpdateContract(t *t.T) {
 func TestUpdateContractOnFailure(t *t.T) {
 	db, mock := getDbAndMock(t)
 	defer db.Close()
-	house := domain.GetMock()
+	hc := domain.GetMock()
 	mock.ExpectBegin()
 	mock.ExpectExec("UPDATE House_Contract SET").
-		WithArgs(house.Trade, house.CompanyName, house.DocumentID, house.Contract.CdContract,
-			house.Contract.DtInitContract, house.Contract.DtEndContract, house.Contract.IsActive, house.ID).
+		WithArgs(hc.Trade, hc.CompanyName, hc.DocumentID, hc.TpContract.CdContract,
+			hc.DtInitContract, hc.DtEndContract, hc.IsActive, hc.ID).
 		WillReturnError(errors.New("Error"))
 	mock.ExpectRollback()
 	a := NewContractsPostgresqlRepository(db)
-	if err := a.Update(&house); err == nil {
+	if err := a.Update(&hc); err == nil {
 		t.Errorf("Error updating house contract.")
 		t.Error(err)
 	}
