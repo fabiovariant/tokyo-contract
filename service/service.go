@@ -1,14 +1,14 @@
-package repository
+package service
 
 import (
 	"github.com/fabiovariant/tokyo-domains/contract"
 )
 
-// ClientContractsRepository is a interface to interact with the contracts layer on
+// ClientContractsService is a interface to interact with the contracts layer on
 // repository
-type ClientContractsRepository interface {
+type ClientContractsService interface {
 	// NewContract add a new contract to repository
-	NewContract(c *contract.Contract) (err error)
+	NewContract(h *contract.Contract) (err error)
 
 	// GetContractByClientID list a contract by house ID
 	GetContractByClientID(id int64) (h *contract.Contract, err error)

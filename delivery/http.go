@@ -1,0 +1,78 @@
+package delivery
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+
+	"github.com/fabiovariant/tokyo-contracts/service"
+	"github.com/fabiovariant/tokyo-domains/contract"
+	"github.com/gorilla/mux"
+	"github.com/op/go-logging"
+)
+
+var log = logging.MustGetLogger("delivery-http")
+
+// ClientContractsHTTPDelivery http delivery impl
+type ClientContractsHTTPDelivery struct {
+	s service.ClientContractsService
+}
+
+// NewClientContractHTTPDelivery returns a instantiate service type
+func NewClientContractHTTPDelivery(s service.ClientContractsService) ClientContractsDelivery {
+	return &ClientContractsHTTPDelivery{s}
+}
+
+// NewContract http impl
+func (cht *ClientContractsHTTPDelivery) NewContract(w http.ResponseWriter, r *http.Request) {
+	var c contract.Contract
+	jsonToContract(r.Body, &c)
+	fmt.Printf("is nil? %v", cht.s == nil)
+	err := cht.s.NewContract(&c)
+	if err != nil {
+		simpleMessageWithJSON(w, "Internal server Error", http.StatusInternalServerError)
+		panic(err)
+	}
+	simpleMessageWithJSON(w, "Success", http.StatusOK)
+}
+
+// GetContractByClientID http impl
+func (cht *ClientContractsHTTPDelivery) GetContractByClientID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	q := vars["id"]
+	contractID, err := strconv.ParseInt(q, 10, 64)
+	if err != nil {
+		log.Error("Error: ", err)
+		simpleMessageWithJSON(w, "Internal server Error", http.StatusInternalServerError)
+		return
+	}
+	c, err := cht.s.GetContractByClientID(contractID)
+	if err != nil {
+		panic(err)
+	}
+	simpleMessageWithJSON(w, c, http.StatusOK)
+	return
+}
+
+// Update http impl
+func (cht *ClientContractsHTTPDelivery) Update(w http.ResponseWriter, r *http.Request) {
+	return
+}
+
+func jsonToContract(r io.Reader, c *contract.Contract) error {
+	if err := json.NewDecoder(r).Decode(c); err != nil {
+		return errors.New("Erro ao converter JSON \n" + err.Error())
+	}
+	return nil
+}
+
+func simpleMessageWithJSON(w http.ResponseWriter, message interface{}, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(code)
+	if err := json.NewEncoder(w).Encode(message); err != nil {
+		panic(err)
+	}
+}
