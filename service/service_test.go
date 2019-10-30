@@ -86,9 +86,21 @@ func TestUpdate(t *t.T) {
 	repoMock.AssertExpectations(t)
 }
 
+func TestUpdateIDFail(t *t.T) {
+	repoMock := new(repository.Mock)
+	contract := getValidContract()
+	service := NewClientContractService(repoMock)
+	if err := service.Update(&contract); err == nil {
+		t.Error("Error on update contract fail test")
+	}
+	repoMock.AssertNotCalled(t, "Update", &contract)
+}
+
 func TestUpdateDataFail(t *t.T) {
 	repoMock := new(repository.Mock)
 	contract := getValidContract()
+	contract.ID = 10
+	contract.Trade = ""
 	service := NewClientContractService(repoMock)
 	if err := service.Update(&contract); err == nil {
 		t.Error("Error on update contract fail test")

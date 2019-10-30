@@ -3,7 +3,6 @@ package delivery
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -29,12 +28,17 @@ func NewClientContractHTTPDelivery(s service.ClientContractsService) ClientContr
 // NewContract http impl
 func (cht *ClientContractsHTTPDelivery) NewContract(w http.ResponseWriter, r *http.Request) {
 	var c contract.Contract
-	jsonToContract(r.Body, &c)
-	fmt.Printf("is nil? %v", cht.s == nil)
+	if err := jsonToContract(r.Body, &c); err != nil {
+		log.Error("Error: ", err)
+		simpleMessageWithJSON(w, "Internal Bad Request", http.StatusBadRequest)
+		return
+	}
+
 	err := cht.s.NewContract(&c)
 	if err != nil {
+		log.Error("Error: ", err)
 		simpleMessageWithJSON(w, "Internal server Error", http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 	simpleMessageWithJSON(w, "Success", http.StatusOK)
 }
@@ -46,20 +50,35 @@ func (cht *ClientContractsHTTPDelivery) GetContractByClientID(w http.ResponseWri
 	contractID, err := strconv.ParseInt(q, 10, 64)
 	if err != nil {
 		log.Error("Error: ", err)
+		simpleMessageWithJSON(w, "Internal Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	c, err := cht.s.GetContractByClientID(contractID)
+	if err != nil {
+		log.Error("Error: ", err)
 		simpleMessageWithJSON(w, "Internal server Error", http.StatusInternalServerError)
 		return
 	}
-	c, err := cht.s.GetContractByClientID(contractID)
-	if err != nil {
-		panic(err)
-	}
 	simpleMessageWithJSON(w, c, http.StatusOK)
-	return
 }
 
 // Update http impl
 func (cht *ClientContractsHTTPDelivery) Update(w http.ResponseWriter, r *http.Request) {
-	return
+	var c contract.Contract
+	if err := jsonToContract(r.Body, &c); err != nil {
+		log.Error("Error: ", err)
+		simpleMessageWithJSON(w, "Internal Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err := cht.s.Update(&c)
+	if err != nil {
+		log.Error("Error: ", err)
+		simpleMessageWithJSON(w, "Internal server Error", http.StatusInternalServerError)
+		return
+	}
+	simpleMessageWithJSON(w, "Success", http.StatusOK)
 }
 
 func jsonToContract(r io.Reader, c *contract.Contract) error {
