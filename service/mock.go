@@ -1,4 +1,4 @@
-package repository
+package service
 
 import (
 	"github.com/fabiovariant/tokyo-domains/contract"
@@ -11,14 +11,14 @@ type Mock struct {
 	mock.Mock
 }
 
-// NewContract mock to repository layer.
+// NewContract mock to service layer.
 func (mock *Mock) NewContract(h *contract.Contract) (err error) {
 	args := mock.Called(h)
 	err = args.Error(0)
 	return
 }
 
-// GetContractByClientID mock to repository layer.
+// GetContractByClientID mock to service layer.
 func (mock *Mock) GetContractByClientID(id int64) (c *contract.Contract, err error) {
 	args := mock.Called(id)
 
@@ -29,7 +29,7 @@ func (mock *Mock) GetContractByClientID(id int64) (c *contract.Contract, err err
 	return
 }
 
-// Update mock to repository layer.
+// Update mock to service layer.
 func (mock *Mock) Update(h *contract.Contract) (err error) {
 	args := mock.Called(h)
 	err = args.Error(0)

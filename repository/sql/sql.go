@@ -21,7 +21,15 @@ func (cr *clientContractsSQLRepository) NewContract(c *contract.Contract) (err e
 	if err != nil {
 		return err
 	}
-	defer cr.deferTxFunc()(tx, &err)
+	
+	defer func() {
+        if err == nil {
+            tx.Commit()
+        } else {
+            tx.Rollback()
+        }
+    }()
+
 
 	sql := `INSERT INTO Client_Contract (Trade, Company_Name, Document_ID, cd_Contract, dt_init_contract, dt_end_contract) VALUES (?, ?, ?, ?, ?, ?)`
 	rs, err := tx.Exec(sql, c.Trade, c.CompanyName, c.DocumentID, c.TpContract.CdContract, c.DtInitContract, c.DtEndContract)
@@ -37,7 +45,14 @@ func (cr *clientContractsSQLRepository) GetContractByClientID(id int64) (c *cont
 	if err != nil {
 		return nil, err
 	}
-	defer cr.deferTxFunc()(tx, &err)
+	
+	defer func() {
+        if err == nil {
+            tx.Commit()
+        } else {
+            tx.Rollback()
+        }
+    }()
 
 	sql := `SELECT Client_Id, Trade, Company_Name, Document_ID, cd_Contract, dt_init_contract, dt_end_contract, is_active
 				FROM Client_Contract WHERE Client_Id = $1`
@@ -63,21 +78,33 @@ func (cr *clientContractsSQLRepository) GetContractByClientID(id int64) (c *cont
 }
 
 func (cr *clientContractsSQLRepository) Update(c *contract.Contract) (err error) {
-	return
-}
-
-func (cr *clientContractsSQLRepository) deferTxFunc() func(tx *sql.Tx, err *error) {
-
-	return func(tx *sql.Tx, err *error) {
-		if p := recover(); p != nil {
-			tx.Rollback()
-			panic(p)
-		} else if err != nil {
-			tx.Rollback()
-		} else {
-			if er := tx.Commit(); er != nil {
-				panic(er)
-			}
-		}
+	tx, err := cr.db.Begin()
+	if err != nil {
+		return err
 	}
+
+	defer func() {
+        if err == nil {
+            tx.Commit()
+        } else {
+            tx.Rollback()
+        }
+    }()
+
+	sql := `UPDATE Client_Contract SET
+			    Trade               = ?
+			    Company_Name        = ?
+			    Document_ID         = ?
+			    cd_Contract         = ?
+			    dt_init_contract    = ?
+			    dt_end_contract     = ?
+			    is_active           = ?
+			WHERE Client_Id = ?`
+
+	_, err = tx.Exec(sql, c.Trade, c.CompanyName, c.DocumentID, c.TpContract.CdContract,
+		c.DtInitContract, c.DtEndContract, c.IsActive, c.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
