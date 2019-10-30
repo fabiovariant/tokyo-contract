@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/fabiovariant/tokyo-commons/database v1.1.0
-	github.com/fabiovariant/tokyo-domains/contract v1.0.0
+	github.com/fabiovariant/tokyo-domains/contract v1.1.0
 	github.com/fabiovariant/tokyo-domains/route v1.0.0
 	github.com/gorilla/mux v1.7.3
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
@@ -15,4 +15,5 @@ require (
 	go.uber.org/dig v1.7.0 // indirect
 	go.uber.org/fx v1.9.0
 	go.uber.org/multierr v1.2.0 // indirect
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 )
